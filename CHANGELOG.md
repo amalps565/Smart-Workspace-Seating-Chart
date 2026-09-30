@@ -26,5 +26,5 @@ Every entry ends with its number: `(#<issue>)` for issue work, `(PR #<n>)` for a
 ### Changed
 - Backend stack moved from Spring Boot 3 to Spring Boot 4.1 in `README.md`, `CLAUDE.md`, and the Java agent, because Spring Initializr no longer offers 3.x. (#1)
 - `CLAUDE.md` lists the `e2e/` commands and the port 5432 workaround, and `frontend/CLAUDE.md` points to `e2e/` for end-to-end tests. (#8)
-- `README.md` has a full Troubleshooting section, covering running the app, low memory, and builds and tests, and links to the wiki's Troubleshooting page. It replaces the port-5432-only note. (PR #NUM)
+- `README.md` has a full Troubleshooting section, covering running the app, low memory, and builds and tests, and links to the wiki's Troubleshooting page. It replaces the port-5432-only note. (PR #21)
 - End-to-end race tests wait up to 30 seconds for a race to settle, instead of the global 10 seconds, so they pass on slow machines. Their time limit now grows with the number of rounds. (#19)
