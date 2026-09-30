@@ -58,6 +58,17 @@ The GitHub wiki explains this design in more depth; see "Wiki" below.
 - **Prove race fixes with a concurrency test:** fire simultaneous requests for the same desk *and* for neighbouring desks on the same date against Testcontainers PostgreSQL, run the test many times, and assert that exactly one wins and the spacing rule still holds.
 - **End-to-end tests** use Playwright with two browser contexts competing for neighbouring desks.
 
+## Changelogs
+
+Every change is recorded under `## [Unreleased]` in the same PR, in the changelog for what it touches:
+- `backend/CHANGELOG.md` for `backend/`
+- `frontend/CHANGELOG.md` for `frontend/`
+- the root `CHANGELOG.md` for everything else: docs, `.claude/` skills and agents, CI, `e2e/`, and tooling
+
+A PR that touches several of these updates each one. Use the Keep a Changelog sections (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+
+**Every entry ends with its number:** `(#<issue>)` for issue work, or `(PR #<n>)` for a PR without an issue.
+
 ## Wiki
 
 - The design docs live in the GitHub wiki: https://github.com/amalps565/Smart-Workspace-Seating-Chart/wiki. It's a separate git repo, `https://github.com/amalps565/Smart-Workspace-Seating-Chart.wiki.git`, with one Markdown file per page plus `_Sidebar.md` and `_Footer.md`. Pages link to each other with `[[Page Name]]`.
