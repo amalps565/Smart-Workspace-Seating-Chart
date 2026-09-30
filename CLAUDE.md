@@ -11,7 +11,7 @@ An interactive Office Hot-Desking Map: employees see a floor as a grid of desks 
 - `backend/`: Spring Boot app. Commands and conventions are in `backend/CLAUDE.md`.
 - `frontend/`: React + TypeScript app. Commands and conventions are in `frontend/CLAUDE.md`.
 - `docker-compose.yml`: PostgreSQL for local development (not created yet).
-- `docs/wiki/`: source of the GitHub wiki pages.
+- `.wiki/`: local clone of the GitHub wiki, for editing it (gitignored; see "Wiki" below).
 - `.claude/skills/`: workflow skills: `create-issue`, `start-issue`, `pr-review`, `merge-pr`.
 - `.claude/agents/`: `senior-java-engineer` (backend), `senior-frontend-engineer` (frontend), `senior-qa-engineer` (tests across both).
 
@@ -38,7 +38,7 @@ Both sides depend on this. Change it only on purpose, and update both sides in t
 - Clients subscribe to the topic first and buffer updates until the snapshot arrives, then apply the buffered updates by `seq`, so nothing sent during the snapshot request is lost.
 - `bookings` has an index on `(floor_id, date)` for snapshots and spacing checks.
 
-The GitHub wiki explains this design in more depth. Its source is `docs/wiki/`; see "Wiki" below.
+The GitHub wiki explains this design in more depth; see "Wiki" below.
 
 ## Known problems to fix
 
@@ -59,9 +59,9 @@ The GitHub wiki explains this design in more depth. Its source is `docs/wiki/`; 
 
 ## Wiki
 
-- `docs/wiki/` is the source of the GitHub wiki: one Markdown file per page, plus `_Sidebar.md` and `_Footer.md`. Edit pages there, never directly on GitHub.
-- When a change affects the design, rules, or contract, update the matching wiki page in the same PR.
-- To publish, clone `https://github.com/amalps565/Smart-Workspace-Seating-Chart.wiki.git` into `.wiki/` (gitignored) inside this repo, copy `docs/wiki/*.md` into it, then commit and push there. Never clone the wiki anywhere outside this repo.
+- The design docs live in the GitHub wiki: https://github.com/amalps565/Smart-Workspace-Seating-Chart/wiki. It's a separate git repo, `https://github.com/amalps565/Smart-Workspace-Seating-Chart.wiki.git`, with one Markdown file per page plus `_Sidebar.md` and `_Footer.md`. Pages link to each other with `[[Page Name]]`.
+- To edit it, clone or pull it into `.wiki/` inside this repo (gitignored), edit there, then commit and push from `.wiki/`. Never clone the wiki anywhere outside this repo.
+- When a change affects the design, rules, or contract, update the matching wiki page too, and mention it in the PR.
 
 ## Assumptions
 

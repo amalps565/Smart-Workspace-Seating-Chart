@@ -2,6 +2,8 @@
 
 An interactive **Office Hot-Desking Map**. Employees see an office floor as a grid of desks, watch desk statuses change in real time, and click a desk to reserve it for the day.
 
+📖 The full design (architecture, data model, booking concurrency, API, and workflow) is in the [project wiki](https://github.com/amalps565/Smart-Workspace-Seating-Chart/wiki).
+
 ## Features
 
 - **Floor grid:** each floor is a matrix of cells (rows × columns). A cell is a desk or a non-bookable space such as a walkway, wall, or meeting room.

@@ -98,7 +98,7 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
-# ===== GitHub wiki clone (published from docs/wiki/) =====
+# ===== Local clone of the GitHub wiki (a separate repo) =====
 .wiki/
 
 # ===== Logs and temp files =====
