@@ -101,17 +101,7 @@ The Vite dev server forwards `/api` and `/ws` to the backend. The backend reads 
 
 Bookings are open from today up to 14 days ahead. To stop PostgreSQL, run `docker compose down` (add `-v` to delete its data).
 
-### Troubleshooting: port 5432 is already in use
-
-If another PostgreSQL is already running on port 5432 (for example a local Windows service), the backend connects to it and fails with `password authentication failed for user "seating"`. You have two options.
-
-- **Run Compose on another port:**
-  ```sh
-  POSTGRES_PORT=5433 docker compose up -d --wait
-  DB_URL=jdbc:postgresql://localhost:5433/seating ./mvnw spring-boot:run
-  ```
-  In PowerShell, set `$env:POSTGRES_PORT="5433"` and `$env:DB_URL="jdbc:postgresql://localhost:5433/seating"` first.
-- **Skip Compose:** run `./mvnw spring-boot:test-run` in `backend/`. It starts the backend with its own throwaway Testcontainers PostgreSQL. It needs Docker, and its data is lost when it stops.
+If something doesn't work, see [Troubleshooting](#troubleshooting) below.
 
 ### Run the tests
 
@@ -124,3 +114,39 @@ If another PostgreSQL is already running on port 5432 (for example a local Windo
 The end-to-end tests start the backend and the frontend themselves, or reuse ones that are already running. Set `PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers` for both the browser install and the test run if you want the browser kept inside the repo instead of your user cache. See [`e2e/README.md`](e2e/README.md) for running single tests, debugging, and reports.
 
 CI (`.github/workflows/ci.yml`) runs all three suites on every pull request and push to `main`.
+
+## Troubleshooting
+
+The most common local problems are listed below. The [Troubleshooting wiki page](https://github.com/amalps565/Smart-Workspace-Seating-Chart/wiki/Troubleshooting) has more detail, plus Playwright setup and GitHub workflow issues.
+
+### Running the app
+
+- **`http://127.0.0.1:5173` doesn't load.** The Vite dev server listens on `localhost` only. Open **http://localhost:5173**.
+- **The backend fails with `password authentication failed for user "seating"`.** Another PostgreSQL, such as a local Windows service, is already on port 5432, and the backend connected to it. Either:
+  - run Compose on another port:
+    ```sh
+    POSTGRES_PORT=5433 docker compose up -d --wait
+    DB_URL=jdbc:postgresql://localhost:5433/seating ./mvnw spring-boot:run
+    ```
+    In PowerShell, set `$env:POSTGRES_PORT="5433"` and `$env:DB_URL="jdbc:postgresql://localhost:5433/seating"` first; or
+  - skip Compose: run `./mvnw spring-boot:test-run` in `backend/`. It uses its own throwaway Testcontainers PostgreSQL, and its data is lost when it stops.
+- **Ports 8080 or 5173 are still in use after stopping the servers.** Stopping the launching terminal can leave the Java or Node process running. Find it with `netstat -ano | findstr ":8080 :5173"`, then stop it with `Stop-Process -Id <PID>` in PowerShell.
+- **The backend takes minutes to start.** `spring-boot:test-run` starts a PostgreSQL container first, which can take several minutes on a slow machine. Wait for `Started SeatingApplication`.
+- **The map says "Reconnecting… the map may be out of date".** The WebSocket can't reach the backend. Check the backend is running on port 8080, and that you opened the app through `localhost:5173`, which proxies `/ws`.
+- **"Today" looks wrong around midnight.** The date picker uses the browser's time zone, but the backend uses `BOOKING_ZONE` (default `UTC`). Set it to your office's zone.
+
+### Low memory
+
+On a machine with about 4 GB of RAM, running Docker, the backend, the frontend, and Playwright's browsers together can run out of memory. Signs of this:
+- the backend logs `Failed to validate connection ... (This connection has been closed.)` or `Thread starvation or clock leap detected`
+- the app hangs on "Signing in…" or "Loading the floor map…" while the indicator says **Live**
+- end-to-end tests time out, with screenshots showing no wrong states
+
+These are environment problems, not app bugs. Close other apps, give Docker Desktop more memory (Settings → Resources), or run one end-to-end file at a time (`npx playwright test tests/race.spec.ts`). CI runs the full suite.
+
+### Builds and tests
+
+- **Maven prints `Premature end of Content-Length delimited message body`.** A download was cut off. Rerun the command.
+- **`'mvnw.cmd' is not recognized` or `./mvnw: Permission denied`.** On Windows, run `.\mvnw.cmd` with the path. On macOS and Linux, `backend/mvnw` must be executable with LF line endings; `.gitattributes` keeps it LF, and `git update-index --chmod=+x backend/mvnw` restores the executable bit.
+- **The first Vitest run on Windows times out.** Starting jsdom the first time can take over a minute. Rerun `npm test`, or run one file with `npx vitest run <file>`.
+- **The end-to-end tests changed my bookings.** They reuse a running backend, and cancel every seeded user's bookings on today + 2 through today + 10 before and after each test.
