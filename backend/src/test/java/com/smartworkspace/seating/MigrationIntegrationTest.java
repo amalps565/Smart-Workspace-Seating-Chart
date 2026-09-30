@@ -5,14 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 class MigrationIntegrationTest extends IntegrationTest {
-
-	@Autowired
-	private JdbcTemplate jdbc;
 
 	@Test
 	void seedsDemoUsers() {

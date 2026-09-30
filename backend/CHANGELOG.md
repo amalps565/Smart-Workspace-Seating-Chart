@@ -17,3 +17,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - Stateless Spring Security (OAuth2 resource server): every `/api/**` endpoint except login needs a valid bearer token; 401 and 403 use the `{code, message}` body. (#2)
 - Shared `@RestControllerAdvice` with `ApiException`, mapping validation errors to 400 `VALIDATION_ERROR` and every error to `{code, message}`. (#2)
 - Configuration `app.jwt.secret` (`JWT_SECRET`), `app.jwt.ttl`, `app.booking.zone`, `app.booking.window-days`, and an injectable `Clock` in the office time zone. (#2)
+- `GET /api/floors` lists floors `{id, name, rows, cols, neighbourMode}`, and `GET /api/floors/{id}/snapshot?date=` returns every cell with the desk `status`, `bookedBy`, `bookedByUsername`, `seq`, and `bookingId` only on the caller's own booking. Returns 400 `INVALID_DATE` outside the booking window or for a malformed date, and 404 `NOT_FOUND` for an unknown floor. A snapshot is one floor lookup plus one join query, whatever the floor size. (#3)
+- Testcontainers PostgreSQL startup timeout raised to 4 minutes for slow local Docker VMs. (#3)
