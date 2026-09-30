@@ -30,7 +30,7 @@ export default defineConfig({
         {
           name: 'backend',
           // Needs PostgreSQL: run `docker compose up -d --wait` in the repo root first.
-          command: isWindows ? 'mvnw.cmd -B spring-boot:run' : './mvnw -B spring-boot:run',
+          command: isWindows ? '.\\mvnw.cmd -B spring-boot:run' : './mvnw -B spring-boot:run',
           cwd: '../backend',
           // A protected endpoint answers 401 without a token, which Playwright treats as ready.
           url: `${API_URL}/api/floors`,
