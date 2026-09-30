@@ -20,7 +20,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Books and cancels desks, enforcing the booking window, desk-only booking, one booking per desk and per user per
- * day, and the spacing rule. Every change takes a new desk version from {@code desk_status_seq}.
+ * day, and the spacing rule. Every change takes a new desk version from {@code desk_status_seq} while holding the
+ * desk's row lock, so each desk's versions increase in commit order.
+ * <p>
+ * Concurrency: a booking locks the target desk and its neighbour desk rows ({@code SELECT ... FOR UPDATE}, ascending
+ * id) before checking for existing bookings, so two bookings of the same or neighbouring desks serialise. The unique
+ * constraints on {@code (desk_id, date)} and {@code (user_id, date)} remain as a second line of defence; the second
+ * one is what stops one user booking two unrelated desks at the same moment.
  */
 @Service
 public class BookingService {
@@ -56,11 +62,17 @@ public class BookingService {
 			throw ApiException.badRequest(ErrorCodes.NOT_A_DESK, "Cell " + deskId + " is not a bookable desk.");
 		}
 		Floor floor = this.floors.findById(desk.getFloorId()).orElseThrow();
+		// The grid layout never changes at runtime, so the neighbours can be read without a lock.
 		List<Cell> neighbours = this.neighbourPolicy.neighbourDesks(floor, desk);
 
 		List<Long> deskIds = new ArrayList<>();
 		deskIds.add(desk.getId());
 		neighbours.forEach((neighbour) -> deskIds.add(neighbour.getId()));
+		deskIds.sort(null);
+		// Locked check-and-save: lock the target desk and its neighbours (ascending id) before checking. Any booking
+		// or cancel of an overlapping desk holds one of these rows, so it waits here until the other transaction
+		// commits, and the check below (a new statement under READ COMMITTED) then sees its result.
+		this.cells.lockInIdOrder(deskIds);
 		List<Long> booked = this.bookings.findBookedDeskIds(deskIds, date);
 		if (booked.contains(desk.getId())) {
 			throw ApiException.conflict(ErrorCodes.DESK_TAKEN, "The desk is already booked for " + date + ".");
@@ -86,7 +98,8 @@ public class BookingService {
 		if (!booking.getUserId().equals(user.id())) {
 			throw ApiException.forbidden("You can cancel only your own bookings.");
 		}
-		Cell desk = this.cells.findById(booking.getDeskId()).orElseThrow();
+		// Lock the desk so the version bump is ordered with any concurrent booking that involves this desk.
+		Cell desk = this.cells.lockInIdOrder(List.of(booking.getDeskId())).get(0);
 		if (this.bookings.deleteBookingById(bookingId) == 0) {
 			throw ApiException.notFound("Booking " + bookingId + " does not exist.");
 		}

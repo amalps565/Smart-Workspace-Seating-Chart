@@ -1,9 +1,13 @@
 package com.smartworkspace.seating.floor;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
+import jakarta.persistence.LockModeType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -26,6 +30,14 @@ public interface CellRepository extends JpaRepository<Cell, Long> {
 
 	/** The cells in a rectangle of a floor; used by the neighbour policy to read the cells around a desk. */
 	List<Cell> findByFloorIdAndRowBetweenAndColBetween(long floorId, int rowFrom, int rowTo, int colFrom, int colTo);
+
+	/**
+	 * Locks the given cells with {@code SELECT ... FOR UPDATE}, in ascending id order. PostgreSQL applies the row
+	 * locks after the sort, so every transaction acquires overlapping locks in the same order and cannot deadlock.
+	 */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("select c from Cell c where c.id in :ids order by c.id")
+	List<Cell> lockInIdOrder(@Param("ids") Collection<Long> ids);
 
 	/** The next desk version from {@code desk_status_seq}. */
 	@Query(value = "select nextval('desk_status_seq')", nativeQuery = true)
