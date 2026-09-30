@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: seating
+  datasource:
+    # Defaults match docker-compose.yml; override with environment variables elsewhere.
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/seating}
+    username: ${DB_USERNAME:seating}
+    password: ${DB_PASSWORD:seating}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # The schema is owned by Flyway; Hibernate only checks that entities match it.
+      ddl-auto: validate
+  flyway:
+    locations: classpath:db/migration

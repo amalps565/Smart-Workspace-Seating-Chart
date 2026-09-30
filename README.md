@@ -22,7 +22,7 @@ An interactive **Office Hot-Desking Map**. Employees see an office floor as a gr
 
 | Layer    | Technology                                                  |
 | -------- | ----------------------------------------------------------- |
-| Backend  | Java 21, Spring Boot 3, Spring Data JPA, Flyway, Spring Security (JWT), WebSocket (STOMP) |
+| Backend  | Java 21, Spring Boot 4, Spring Data JPA, Flyway, Spring Security (JWT), WebSocket (STOMP) |
 | Frontend | React, TypeScript, Vite                                     |
 | Database | PostgreSQL, run with Docker Compose                         |
 | Testing  | JUnit 5 and Testcontainers (backend); Vitest and Testing Library (frontend); Playwright (end to end) |
