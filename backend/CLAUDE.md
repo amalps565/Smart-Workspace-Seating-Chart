@@ -15,7 +15,28 @@ Spring Boot 4.1 on Java 21, built with the Maven wrapper (no local Maven needed)
 
 The database connection defaults to the Compose values (`seating`/`seating` on `localhost:5432`). Override it with `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`.
 
-Base package: `com.smartworkspace.seating`. Tests that need the database import `TestcontainersConfiguration`, whose PostgreSQL image must match `docker-compose.yml`.
+Base package: `com.smartworkspace.seating`. Integration tests extend `IntegrationTest` (Testcontainers PostgreSQL via `TestcontainersConfiguration`, MockMvc), so they share one application context and one container. The PostgreSQL image must match `docker-compose.yml`.
+
+## Configuration
+
+- `app.jwt.secret` (env `JWT_SECRET`): HMAC-SHA256 signing key, at least 32 bytes. The default in `application.yml` is for local development only.
+- `app.jwt.ttl` (env `JWT_TTL`, default `8h`): token lifetime.
+- `app.booking.zone` (env `BOOKING_ZONE`, default `UTC`): the office time zone that defines "today". Inject the `Clock` bean instead of calling `now()`.
+- `app.booking.window-days` (default `14`): bookings are allowed from today up to this many days ahead.
+
+## Demo users
+
+Seeded by `V2__seed.sql`. Every password is `password`.
+
+| Username | Display name |
+|---|---|
+| `alice` | Alice Anders |
+| `bob` | Bob Brown |
+| `carol` | Carol Chen |
+| `dave` | Dave Diaz |
+| `erin` | Erin Evans |
+
+Seeded floors: "Floor 3" (8 rows x 12 cols, `ORTHOGONAL`, column 6 is a walkway, desks labelled `3-A1` to `3-H12`) and "Floor 4" (4 x 6, all desks, `ALL`).
 
 ## Structure
 

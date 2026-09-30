@@ -12,3 +12,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `application.yml` with database settings that can be overridden through environment variables, and a schema owned only by Flyway (`ddl-auto: validate`). (#1)
 - Testcontainers PostgreSQL test setup and a smoke test that connects to the database. (#1)
 - `docker-compose.yml` with PostgreSQL 17 for local development, and a CI job that runs `./mvnw verify`. (#1)
+- Flyway migrations `V1__schema.sql` (`users`, `floors`, `cells`, `bookings`, unique `(desk_id, date)` and `(user_id, date)`, index on `bookings(floor_id, date)`, sequence `desk_status_seq`) and `V2__seed.sql` (five demo users, "Floor 3" 8x12 `ORTHOGONAL` with a walkway column, "Floor 4" 4x6 `ALL`). (#2)
+- `POST /api/auth/login` returns `{token, username, displayName}` (HS256 JWT, 8h by default), or 401 `INVALID_CREDENTIALS`. (#2)
+- Stateless Spring Security (OAuth2 resource server): every `/api/**` endpoint except login needs a valid bearer token; 401 and 403 use the `{code, message}` body. (#2)
+- Shared `@RestControllerAdvice` with `ApiException`, mapping validation errors to 400 `VALIDATION_ERROR` and every error to `{code, message}`. (#2)
+- Configuration `app.jwt.secret` (`JWT_SECRET`), `app.jwt.ttl`, `app.booking.zone`, `app.booking.window-days`, and an injectable `Clock` in the office time zone. (#2)

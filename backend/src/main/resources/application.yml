@@ -13,3 +13,14 @@ spring:
       ddl-auto: validate
   flyway:
     locations: classpath:db/migration
+
+app:
+  jwt:
+    # Dev-only default (HMAC-SHA256 needs at least 32 bytes). Always set JWT_SECRET outside local development.
+    secret: ${JWT_SECRET:dev-only-insecure-secret-change-me-0123456789abcdef}
+    ttl: ${JWT_TTL:8h}
+  booking:
+    # The office's time zone; "today" and booking dates are local dates in this zone.
+    zone: ${BOOKING_ZONE:UTC}
+    # Bookings are allowed from today up to this many days ahead.
+    window-days: 14
