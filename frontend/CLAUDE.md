@@ -37,4 +37,4 @@ The first Vitest run on Windows can time out while jsdom starts; rerunning fixes
 - Cells are `button`s with arrow-key grid navigation. Status uses an icon and label as well as colour.
 - Booking results and conflicts are announced through an `aria-live` region.
 - Tests use Vitest and Testing Library, with MSW and a mocked socket. Never store or log the JWT anywhere except the auth module.
-- Record every notable frontend change under `## [Unreleased]` in `frontend/CHANGELOG.md`, in the same PR. Use the Keep a Changelog sections (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).
+- Record every notable frontend change under `## [Unreleased]` in `frontend/CHANGELOG.md`, in the same PR, ending with its number (see "Changelogs" in the root `CLAUDE.md`). Use the Keep a Changelog sections (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`).

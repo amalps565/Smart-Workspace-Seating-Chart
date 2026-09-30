@@ -53,4 +53,4 @@ Seeded floors: "Floor 3" (8 rows x 12 cols, `ORTHOGONAL`, column 6 is a walkway,
 - Schema and seed data (demo users, sample floor) change only through Flyway migrations in `src/main/resources/db/migration`. Never edit a merged migration; add a new one. Never use `ddl-auto` for the schema.
 - Integration and concurrency tests use Testcontainers PostgreSQL, never H2.
 - Keep local-only configuration in `application-local.yml`, which is gitignored.
-- Record every notable backend change under `## [Unreleased]` in `backend/CHANGELOG.md`, in the same PR. Use the Keep a Changelog sections (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`), and call out API or WebSocket contract changes explicitly.
+- Record every notable backend change under `## [Unreleased]` in `backend/CHANGELOG.md`, in the same PR, ending with its number (see "Changelogs" in the root `CLAUDE.md`). Use the Keep a Changelog sections (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`), and call out API or WebSocket contract changes explicitly.
