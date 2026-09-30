@@ -37,27 +37,29 @@ docker-compose.yml   PostgreSQL for local development
 .github/workflows/   CI: backend, frontend, and end-to-end jobs
 ```
 
-## Known problems
+## The three problems and how they're solved
 
-The core backend works, but three problems need fixing before the map is reliable.
+### 1. Adjacent-seat race conditions ✅ ([#5](https://github.com/amalps565/Smart-Workspace-Seating-Chart/issues/5))
 
-### 1. Adjacent-seat race conditions
+**Problem:** two employees reserving **neighbouring** desks at the same moment could both pass the spacing check before either was saved, so both succeeded. This is a *write skew* race: the requests touch different rows, so a unique constraint or a lock on only the booked desk can't stop it.
 
-Each booking is checked against the desks next to it before it's saved. When two employees reserve **neighbouring** desks for the same day at the same moment, both requests can pass that check before either is saved, so both succeed and the spacing rule is broken. This is a *write skew* race: the two requests touch different rows, so locking or constraining only the desk being booked doesn't stop it.
+**Fix:** the booking runs as one transaction that locks the target desk **and its neighbours** (`SELECT ... FOR UPDATE`, in ascending desk-ID order to avoid deadlocks). It then checks for bookings on that date and inserts. Two bookings for neighbouring desks share locked rows, so the second waits and then gets `409 SPACING_VIOLATION`. A concurrency test fires simultaneous requests against real PostgreSQL and repeats them many times. Without the locks it failed 48 of 50 runs; with them every run passes.
 
-**Expected:** among conflicting concurrent requests, exactly one succeeds and the others are rejected with a clear conflict error.
+### 2. Invalid spatial isolation selections ✅ ([#4](https://github.com/amalps565/Smart-Workspace-Seating-Chart/issues/4))
 
-### 2. Invalid spatial isolation selections
+**Problem:** the backend accepted bookings next to an already-reserved desk.
 
-The backend accepts reservations that break the spacing rule, for example booking a desk next to one that's already reserved for the same day.
+**Fix:** a single neighbour policy reads each floor's `neighbour_mode`: `ORTHOGONAL` (4 sides) or `ALL` (8 including diagonals). Walkways, walls, and rooms never count as neighbours. The server rejects violations with `409 SPACING_VIOLATION`, `DESK_TAKEN`, or `ALREADY_BOOKED_TODAY`. The frontend shows "Too close to a booked desk" early, but the server's check is what counts.
 
-**Expected:** the server rejects every booking that would place two booked desks next to each other on the same day, using the floor's neighbour setting (`ORTHOGONAL` or `ALL`). The frontend may also warn early, but the server's check is what counts.
+### 3. No fluid matrix updates on the frontend ✅ ([#6](https://github.com/amalps565/Smart-Workspace-Seating-Chart/issues/6), [#7](https://github.com/amalps565/Smart-Workspace-Seating-Chart/issues/7))
 
-### 3. No fluid matrix updates on the frontend
+**Problem:** the map needed a refresh to show changes, or redrew the whole grid for one desk.
 
-The map doesn't update smoothly when desk statuses change. It needs a refresh, or it re-renders the whole grid instead of just the changed desk.
-
-**Expected:** status changes reach every open map within moments and update only the affected cells. The map recovers correctly after a dropped connection, and shows no booking that the server rolled back or rejected.
+**Fix:**
+- After each booking or cancel commits, the server sends one small WebSocket (STOMP) message for the changed desk, carrying a version number (`seq`).
+- The browser keeps desks by ID and ignores any update that isn't newer than what it has. It reloads the floor after a reconnect.
+- Each desk is its own memoized cell, so one change redraws one cell.
+- Bookings show instantly and roll back with a clear reason if the server rejects them.
 
 ## Getting started
 
@@ -98,6 +100,18 @@ The Vite dev server forwards `/api` and `/ws` to the backend. The backend reads 
 | `BOOKING_ZONE` | `UTC` | The office time zone that defines "today" |
 
 Bookings are open from today up to 14 days ahead. To stop PostgreSQL, run `docker compose down` (add `-v` to delete its data).
+
+### Troubleshooting: port 5432 is already in use
+
+If another PostgreSQL is already running on port 5432 (for example a local Windows service), the backend connects to it and fails with `password authentication failed for user "seating"`. You have two options.
+
+- **Run Compose on another port:**
+  ```sh
+  POSTGRES_PORT=5433 docker compose up -d --wait
+  DB_URL=jdbc:postgresql://localhost:5433/seating ./mvnw spring-boot:run
+  ```
+  In PowerShell, set `$env:POSTGRES_PORT="5433"` and `$env:DB_URL="jdbc:postgresql://localhost:5433/seating"` first.
+- **Skip Compose:** run `./mvnw spring-boot:test-run` in `backend/`. It starts the backend with its own throwaway Testcontainers PostgreSQL. It needs Docker, and its data is lost when it stops.
 
 ### Run the tests
 

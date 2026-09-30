@@ -12,7 +12,7 @@ React 19 + TypeScript 6, built with Vite 8, linted with oxlint, and tested with 
 - Lint: `npm run lint`
 - Unit tests: `npm test`. For one file: `npx vitest run src/App.test.tsx`. For one test by name: `npx vitest run -t "renders the page heading"`.
 - Production build: `npm run build`
-- End-to-end tests (planned, #8): `npx playwright test`
+- End-to-end tests live in the top-level `e2e/` package, not here. See the root `CLAUDE.md` and `e2e/README.md`.
 
 The first Vitest run on Windows can time out while jsdom starts; rerunning fixes it. On a slow machine, run files one at a time or add `--no-file-parallelism`. Test setup (jest-dom matchers and cleanup) is in `src/test/setup.ts`.
 
