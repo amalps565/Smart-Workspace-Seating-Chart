@@ -54,4 +54,40 @@ public abstract class IntegrationTest {
 				floorId, row, col);
 	}
 
+	/**
+	 * Creates a test floor once (by name) from a layout: {@code D} desk, {@code -} walkway, {@code #} wall,
+	 * {@code R} room. Returns its id.
+	 */
+	protected long ensureFloor(String name, String neighbourMode, String... layout) {
+		java.util.List<Long> existing = this.jdbc.queryForList("select id from floors where name = ?", Long.class,
+				name);
+		if (!existing.isEmpty()) {
+			return existing.get(0);
+		}
+		long floorId = this.jdbc.queryForObject(
+				"insert into floors (name, rows, cols, neighbour_mode) values (?, ?, ?, ?) returning id", Long.class,
+				name, layout.length, layout[0].length(), neighbourMode);
+		for (int r = 0; r < layout.length; r++) {
+			for (int c = 0; c < layout[r].length(); c++) {
+				String type = switch (layout[r].charAt(c)) {
+					case 'D' -> "DESK";
+					case 'R' -> "ROOM";
+					case '#' -> "WALL";
+					default -> "WALKWAY";
+				};
+				this.jdbc.update("insert into cells (floor_id, row, col, type, label) values (?, ?, ?, ?, ?)", floorId,
+						r, c, type, "DESK".equals(type) ? name + "-r" + r + "c" + c : null);
+			}
+		}
+		return floorId;
+	}
+
+	/** Creates a user once (by username) and returns its id. */
+	protected long ensureUser(String username) {
+		this.jdbc.update(
+				"insert into users (username, password_hash, display_name) values (?, '{noop}unused', ?) on conflict (username) do nothing",
+				username, "User " + username);
+		return userId(username);
+	}
+
 }
