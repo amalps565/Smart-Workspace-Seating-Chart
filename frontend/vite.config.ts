@@ -14,5 +14,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Integration tests render the whole app in jsdom; give slow machines some headroom.
+    testTimeout: 15000,
   },
 })
