@@ -17,7 +17,7 @@ Every entry ends with its number: `(#<issue>)` for issue work, `(PR #<n>)` for a
 - `triage-issue` skill. (7af6143)
 - `.gitattributes` for LF line endings, `docker-compose.yml` with PostgreSQL 17, and GitHub Actions CI running the backend and frontend checks on every PR and on pushes to `main`. (#1)
 - `pr-review` checks for a changelog entry and treats a missing one as blocking. (PR #10)
-- This repository changelog, and the rule that every changelog entry ends with its issue or PR number. (PR #NUM)
+- This repository changelog, and the rule that every changelog entry ends with its issue or PR number. (PR #15)
 
 ### Changed
 - Backend stack moved from Spring Boot 3 to Spring Boot 4.1 in `README.md`, `CLAUDE.md`, and the Java agent, because Spring Initializr no longer offers 3.x. (#1)
