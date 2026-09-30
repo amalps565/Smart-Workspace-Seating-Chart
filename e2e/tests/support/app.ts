@@ -90,8 +90,8 @@ export class SeatingApp {
     await this.desk(label).click()
   }
 
-  async expectDesk(label: string, status: RegExp): Promise<void> {
-    await expect(this.desk(label), `desk ${label} as seen by ${this.user.username}`).toHaveAccessibleName(status)
+  async expectDesk(label: string, status: RegExp, options?: { timeout?: number }): Promise<void> {
+    await expect(this.desk(label), `desk ${label} as seen by ${this.user.username}`).toHaveAccessibleName(status, options)
   }
 
   get myBookings(): Locator {
