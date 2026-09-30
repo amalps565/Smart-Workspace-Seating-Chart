@@ -24,6 +24,7 @@ Base package: `com.smartworkspace.seating`. Integration tests extend `Integratio
 - `app.jwt.ttl` (env `JWT_TTL`, default `8h`): token lifetime.
 - `app.booking.zone` (env `BOOKING_ZONE`, default `UTC`): the office time zone that defines "today". Inject the `Clock` bean instead of calling `now()`.
 - `app.booking.window-days` (default `14`): bookings are allowed from today up to this many days ahead.
+- `app.websocket.allowed-origin-patterns` (default `http://localhost:*`, `http://127.0.0.1:*`): browser origins accepted on the `/ws` handshake.
 
 ## Demo users
 
