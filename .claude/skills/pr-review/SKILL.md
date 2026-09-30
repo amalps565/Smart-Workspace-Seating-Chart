@@ -46,6 +46,7 @@ Review the pull request given in `$ARGUMENTS`, which can be a number like `34` o
    - **Requirements:** each acceptance criterion from step 3 is either met or explicitly missing.
    - **Security:** injection, unvalidated input, leaked secrets or tokens, and authorization gaps in the changed code.
    - **Tests:** whether the changed behavior is covered, and whether the tests would actually catch a regression. Any change to booking, locking, or the spacing rule needs a concurrency test that fires simultaneous requests for the same desk *and* for neighbouring desks, repeats many times, and runs against Testcontainers Postgres, not H2.
+   - **Changelog:** every PR that changes `backend/` or `frontend/` must add an entry under `## [Unreleased]` in that part's `CHANGELOG.md` (`backend/CHANGELOG.md`, `frontend/CHANGELOG.md`, or both), using a Keep a Changelog section (`Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`). Check with `gh pr diff <n> --name-only`. If a part changed and its changelog didn't, that's a **blocking** finding. If the PR changes the API or WebSocket contract, the backend entry must say so explicitly. PRs that only touch docs, CI, or `.claude/` don't need an entry.
 
    Before reporting a finding, confirm it against the code. Name the concrete input or interleaving that triggers the problem. Drop anything you can't back up, and skip style nitpicks a linter would catch.
 
