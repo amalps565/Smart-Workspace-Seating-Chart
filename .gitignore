@@ -98,6 +98,9 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 
+# ===== GitHub wiki clone (published from docs/wiki/) =====
+.wiki/
+
 # ===== Logs and temp files =====
 logs/
 *.tmp

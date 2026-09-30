@@ -11,6 +11,7 @@ An interactive Office Hot-Desking Map: employees see a floor as a grid of desks 
 - `backend/`: Spring Boot app. Commands and conventions are in `backend/CLAUDE.md`.
 - `frontend/`: React + TypeScript app. Commands and conventions are in `frontend/CLAUDE.md`.
 - `docker-compose.yml`: PostgreSQL for local development (not created yet).
+- `docs/wiki/`: source of the GitHub wiki pages.
 - `.claude/skills/`: workflow skills: `create-issue`, `start-issue`, `pr-review`, `merge-pr`.
 - `.claude/agents/`: `senior-java-engineer` (backend), `senior-frontend-engineer` (frontend), `senior-qa-engineer` (tests across both).
 
@@ -29,11 +30,15 @@ Start Claude Code from the repo root so all of these are found. Application code
 Both sides depend on this. Change it only on purpose, and update both sides in the same PR.
 
 - `POST /api/auth/login` returns a JWT.
-- `GET /api/floors` lists floors. `GET /api/floors/{id}/snapshot?date=` returns the grid, desk statuses, and versions.
-- `POST /api/bookings` `{deskId, date}` returns 201. Conflicts return 409 with code `DESK_TAKEN`, `SPACING_VIOLATION`, or `ALREADY_BOOKED_TODAY`.
-- `DELETE /api/bookings/{id}` returns 204, or 403 if the booking isn't yours. `GET /api/bookings/me` returns your bookings.
+- `GET /api/floors` lists floors. `GET /api/floors/{id}/snapshot?date=` returns the grid, desk statuses, and each desk's `seq`. A `bookingId` is included only on the caller's own booking, so they can cancel it.
+- `POST /api/bookings` `{deskId, date}` returns 201. Conflicts return 409 with code `DESK_TAKEN`, `SPACING_VIOLATION`, or `ALREADY_BOOKED_TODAY`. Invalid requests return 400 with `INVALID_DATE` (past or beyond the booking window) or `NOT_A_DESK`, and an unknown desk returns 404 `NOT_FOUND`.
+- `DELETE /api/bookings/{id}` returns 204, 403 `FORBIDDEN` if the booking isn't yours, or 404 `NOT_FOUND`. `GET /api/bookings/me` returns your bookings from today onward.
 - Every error body is `{code, message}`.
 - The STOMP topic `/topic/floors/{floorId}/{date}` carries `{deskId, date, status, bookedBy, seq}`. `seq` comes from the Postgres sequence `desk_status_seq` and increases for every change to a desk.
+- Clients subscribe to the topic first and buffer updates until the snapshot arrives, then apply the buffered updates by `seq`, so nothing sent during the snapshot request is lost.
+- `bookings` has an index on `(floor_id, date)` for snapshots and spacing checks.
+
+The GitHub wiki explains this design in more depth. Its source is `docs/wiki/`; see "Wiki" below.
 
 ## Known problems to fix
 
@@ -51,6 +56,12 @@ Both sides depend on this. Change it only on purpose, and update both sides in t
 - **Update only the changed cells.** One desk change re-renders one cell.
 - **Prove race fixes with a concurrency test:** fire simultaneous requests for the same desk *and* for neighbouring desks on the same date against Testcontainers PostgreSQL, run the test many times, and assert that exactly one wins and the spacing rule still holds.
 - **End-to-end tests** use Playwright with two browser contexts competing for neighbouring desks.
+
+## Wiki
+
+- `docs/wiki/` is the source of the GitHub wiki: one Markdown file per page, plus `_Sidebar.md` and `_Footer.md`. Edit pages there, never directly on GitHub.
+- When a change affects the design, rules, or contract, update the matching wiki page in the same PR.
+- To publish, clone `https://github.com/amalps565/Smart-Workspace-Seating-Chart.wiki.git` into `.wiki/` (gitignored) inside this repo, copy `docs/wiki/*.md` into it, then commit and push there. Never clone the wiki anywhere outside this repo.
 
 ## Assumptions
 

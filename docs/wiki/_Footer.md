@@ -1,0 +1,1 @@
+[Repository](https://github.com/amalps565/Smart-Workspace-Seating-Chart) · The `CLAUDE.md` files in the repo are the source of truth for rules and the API contract. If this wiki disagrees with them, the repo wins.
