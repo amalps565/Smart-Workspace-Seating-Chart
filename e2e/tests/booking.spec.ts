@@ -20,12 +20,16 @@ test('a signed-in user books an available desk and it becomes theirs', async ({ 
 
 test('the desks next to a booking show as blocked by the spacing rule', async ({ openApp, date }) => {
   const alice = await openApp(USERS.alice)
+  const bob = await openApp(USERS.bob)
   await alice.showFloor(FLOOR_3, date)
+  await bob.showFloor(FLOOR_3, date)
 
   await alice.clickDesk('3-C3')
   await alice.expectDesk('3-C3', DESK_STATUS.mine)
 
-  // Floor 3 is ORTHOGONAL: the four desks on the sides are blocked, the diagonals are not.
-  for (const label of ['3-B3', '3-D3', '3-C2', '3-C4']) await alice.expectDesk(label, DESK_STATUS.blocked)
-  for (const label of ['3-B2', '3-B4', '3-D2', '3-D4']) await alice.expectDesk(label, DESK_STATUS.available)
+  // The spacing feedback is for other users: the booker can't take a second desk that day anyway.
+  // Floor 3 is ORTHOGONAL: for Bob, the four desks on the sides are blocked, the diagonals are not.
+  await bob.expectDesk('3-C3', DESK_STATUS.bookedBy(USERS.alice.displayName))
+  for (const label of ['3-B3', '3-D3', '3-C2', '3-C4']) await bob.expectDesk(label, DESK_STATUS.blocked)
+  for (const label of ['3-B2', '3-B4', '3-D2', '3-D4']) await bob.expectDesk(label, DESK_STATUS.available)
 })
