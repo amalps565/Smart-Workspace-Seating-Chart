@@ -4,16 +4,19 @@ Guidance for the React + TypeScript frontend. The domain rules and the API and W
 
 ## Commands
 
-The frontend hasn't been scaffolded yet. Once it is, list the real `package.json` scripts here. The planned scripts, run from `frontend/`, are:
+React 19 + TypeScript 6, built with Vite 8, linted with oxlint, and tested with Vitest 5 + Testing Library (jsdom). Run from `frontend/`:
 
-- Install: `npm install`
-- Dev server: `npm run dev` (expects the backend on its default port)
+- Install: `npm install` (CI uses `npm ci`)
+- Dev server: `npm run dev`. It proxies `/api` and `/ws` to the backend on `localhost:8080` (see `vite.config.ts`).
 - Type-check: `npm run typecheck`
 - Lint: `npm run lint`
-- Unit tests: `npm test`, or one file: `npx vitest run src/features/floor/floorStore.test.ts`
-- End-to-end tests: `npx playwright test` (needs the backend and database running), or one test: `npx playwright test -g "neighbour race"`
+- Unit tests: `npm test`. For one file: `npx vitest run src/App.test.tsx`. For one test by name: `npx vitest run -t "renders the page heading"`.
+- Production build: `npm run build`
+- End-to-end tests (planned, #8): `npx playwright test`
 
-## Planned structure
+The first Vitest run on Windows can time out while jsdom starts; rerunning fixes it. Test setup (jest-dom matchers and cleanup) is in `src/test/setup.ts`.
+
+## Structure
 
 - Pages: login, and a floor page with a date picker and the grid.
 - The floor store holds desks normalized by desk ID. It loads from the REST snapshot, then applies socket updates, ignoring any update not newer than the stored version. It reloads the snapshot after reconnecting.

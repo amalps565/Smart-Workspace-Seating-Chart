@@ -4,14 +4,20 @@ Guidance for the Spring Boot backend. The domain rules and the rules every fix m
 
 ## Commands
 
-The backend hasn't been scaffolded yet. Once it is, list the real commands here. The planned commands, run from `backend/`, are:
+Spring Boot 4.1 on Java 21, built with the Maven wrapper (no local Maven needed). Run from `backend/`:
 
 - Build and run all tests: `./mvnw verify` (Testcontainers needs Docker running)
-- Run one test class: `./mvnw test -Dtest=BookingServiceTest`
-- Run one test method: `./mvnw test -Dtest=BookingServiceTest#rejectsNeighbourBooking`
-- Run the app: `docker compose up -d` from the repo root, then `./mvnw spring-boot:run`
+- Compile only: `./mvnw test-compile`
+- Run one test class: `./mvnw test -Dtest=ApplicationSmokeTest`
+- Run one test method: `./mvnw test -Dtest=ApplicationSmokeTest#contextLoadsAndConnectsToPostgres`
+- Run the app against Compose PostgreSQL: `docker compose up -d` from the repo root, then `./mvnw spring-boot:run` (port 8080)
+- Run the app against a throwaway Testcontainers database: `./mvnw spring-boot:test-run` (uses `TestSeatingApplication`)
 
-## Planned structure
+The database connection defaults to the Compose values (`seating`/`seating` on `localhost:5432`). Override it with `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`.
+
+Base package: `com.smartworkspace.seating`. Tests that need the database import `TestcontainersConfiguration`, whose PostgreSQL image must match `docker-compose.yml`.
+
+## Structure
 
 - Layers: REST controllers → services (own transactions and booking rules) → Spring Data JPA repositories.
 - Controllers use DTOs (records) and never expose entities.
