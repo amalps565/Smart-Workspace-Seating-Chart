@@ -13,10 +13,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * Base class for integration tests against Testcontainers PostgreSQL. Tests that extend it share one cached
- * application context, and so one database container. Bookings are deleted after each test.
+ * application context, and so one database container. The app runs on a random port (for WebSocket tests) and
+ * MockMvc is available for REST tests. Bookings are deleted after each test.
  */
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest(properties = { "spring.jpa.properties.hibernate.generate_statistics=true",
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = { "spring.jpa.properties.hibernate.generate_statistics=true",
 		"logging.level.org.hibernate.engine.internal.StatisticalLoggingSessionEventListener=WARN" })
 @AutoConfigureMockMvc
 public abstract class IntegrationTest {

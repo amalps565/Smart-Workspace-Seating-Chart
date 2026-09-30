@@ -12,8 +12,10 @@ import com.smartworkspace.seating.floor.CellRepository;
 import com.smartworkspace.seating.floor.Floor;
 import com.smartworkspace.seating.floor.FloorRepository;
 import com.smartworkspace.seating.floor.NeighbourPolicy;
+import com.smartworkspace.seating.realtime.DeskStatusChanged;
 import com.smartworkspace.seating.security.CurrentUser;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,14 +45,17 @@ public class BookingService {
 
 	private final Clock clock;
 
+	private final ApplicationEventPublisher events;
+
 	public BookingService(BookingRepository bookings, CellRepository cells, FloorRepository floors,
-			NeighbourPolicy neighbourPolicy, BookingWindow window, Clock clock) {
+			NeighbourPolicy neighbourPolicy, BookingWindow window, Clock clock, ApplicationEventPublisher events) {
 		this.bookings = bookings;
 		this.cells = cells;
 		this.floors = floors;
 		this.neighbourPolicy = neighbourPolicy;
 		this.window = window;
 		this.clock = clock;
+		this.events = events;
 	}
 
 	@Transactional
@@ -88,6 +93,9 @@ public class BookingService {
 
 		Booking booking = insert(new Booking(desk.getId(), floor.getId(), user.id(), date, this.clock.instant()));
 		long seq = bumpVersion(desk);
+		// Delivered to WebSocket subscribers only after this transaction commits.
+		this.events.publishEvent(DeskStatusChanged.booked(floor.getId(), desk.getId(), date, user.displayName(),
+				user.username(), seq));
 		return new BookingResponse(booking.getId(), desk.getId(), floor.getId(), date, seq);
 	}
 
@@ -103,7 +111,9 @@ public class BookingService {
 		if (this.bookings.deleteBookingById(bookingId) == 0) {
 			throw ApiException.notFound("Booking " + bookingId + " does not exist.");
 		}
-		bumpVersion(desk);
+		long seq = bumpVersion(desk);
+		this.events.publishEvent(
+				DeskStatusChanged.available(booking.getFloorId(), booking.getDeskId(), booking.getDate(), seq));
 	}
 
 	@Transactional(readOnly = true)
