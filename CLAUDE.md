@@ -12,7 +12,7 @@ An interactive Office Hot-Desking Map: employees see a floor as a grid of desks 
 - `frontend/`: React + TypeScript app. Commands and conventions are in `frontend/CLAUDE.md`.
 - `docker-compose.yml`: PostgreSQL for local development (not created yet).
 - `.wiki/`: local clone of the GitHub wiki, for editing it (gitignored; see "Wiki" below).
-- `.claude/skills/`: workflow skills: `create-issue`, `start-issue`, `pr-review`, `merge-pr`.
+- `.claude/skills/`: workflow skills: `create-issue`, `triage-issue`, `start-issue`, `pr-review`, `merge-pr`.
 - `.claude/agents/`: `senior-java-engineer` (backend), `senior-frontend-engineer` (frontend), `senior-qa-engineer` (tests across both).
 
 Start Claude Code from the repo root so all of these are found. Application code hasn't been scaffolded yet. When it is, update the commands in each part's `CLAUDE.md`.
