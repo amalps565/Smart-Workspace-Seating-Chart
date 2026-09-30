@@ -10,6 +10,7 @@ Spring Boot 4.1 on Java 21, built with the Maven wrapper (no local Maven needed)
 - Compile only: `./mvnw test-compile`
 - Run one test class: `./mvnw test -Dtest=ApplicationSmokeTest`
 - Run one test method: `./mvnw test -Dtest=ApplicationSmokeTest#contextLoadsAndConnectsToPostgres`
+- Run the booking concurrency tests (repeated races, takes a minute or more): `./mvnw test -Dtest=BookingConcurrencyTest`
 - Run the app against Compose PostgreSQL: `docker compose up -d` from the repo root, then `./mvnw spring-boot:run` (port 8080)
 - Run the app against a throwaway Testcontainers database: `./mvnw spring-boot:test-run` (uses `TestSeatingApplication`)
 
