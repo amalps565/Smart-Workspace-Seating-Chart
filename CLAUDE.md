@@ -31,7 +31,7 @@ Start Claude Code from the repo root so all of these are found. Build and test c
 Both sides depend on this. Change it only on purpose, and update both sides in the same PR.
 
 - `POST /api/auth/login` `{username, password}` returns 200 `{token, username, displayName}`, or 401 `INVALID_CREDENTIALS`. Every other `/api/**` call needs `Authorization: Bearer <token>` and returns 401 `UNAUTHORIZED` without it.
-- `GET /api/floors` lists floors. `GET /api/floors/{id}/snapshot?date=` returns the grid, desk statuses, and each desk's `seq`. A `bookingId` is included only on the caller's own booking, so they can cancel it.
+- `GET /api/floors` returns `[{id, name, rows, cols, neighbourMode}]`. `GET /api/floors/{id}/snapshot?date=YYYY-MM-DD` returns `{floorId, date, rows, cols, neighbourMode, cells}`; each cell is `{id, row, col, type, label}` (0-based `row`/`col`), and desk cells add `status` (`AVAILABLE`/`BOOKED`), `bookedBy` (display name or null), `bookedByUsername`, `bookingId`, and `seq`. Non-desk cells have those fields null. A `bookingId` is included only on the caller's own booking, so they can cancel it. Returns 400 `INVALID_DATE` for a past date, a date beyond the booking window, or a malformed date, and 404 `NOT_FOUND` for an unknown floor.
 - `POST /api/bookings` `{deskId, date}` returns 201. Conflicts return 409 with code `DESK_TAKEN`, `SPACING_VIOLATION`, or `ALREADY_BOOKED_TODAY`. Invalid requests return 400 with `INVALID_DATE` (past or beyond the booking window) or `NOT_A_DESK`, and an unknown desk returns 404 `NOT_FOUND`.
 - `DELETE /api/bookings/{id}` returns 204, 403 `FORBIDDEN` if the booking isn't yours, or 404 `NOT_FOUND`. `GET /api/bookings/me` returns your bookings from today onward.
 - Every error body is `{code, message}`.
