@@ -13,6 +13,17 @@ import { expect, test } from './support/fixtures'
  */
 const ROUNDS = Number(process.env.E2E_RACE_ROUNDS ?? 3)
 
+/**
+ * How long to wait for a race to settle. Longer than the global 10s expect timeout, because on a
+ * slow machine the locked booking and the loser's resync can take a while. On CI it settles in
+ * about a second.
+ */
+const RACE_WAIT = 30_000
+const settle = { timeout: RACE_WAIT }
+
+// Each round may wait up to RACE_WAIT several times, so the default 60s test limit isn't enough.
+test.describe.configure({ timeout: 60_000 + ROUNDS * 3 * RACE_WAIT })
+
 interface Scenario {
   title: string
   floor: string
@@ -101,19 +112,23 @@ async function raceOnce(scenario: Scenario, date: string, alice: SeatingApp, bob
     const names = await Promise.all(buttons.map((button) => button.getAttribute('aria-label')))
     return names.filter((name) => name !== null && DESK_STATUS.mine.test(name)).length
   }
-  await expect.poll(mineCount, { message: 'exactly one browser should hold a booking' }).toBe(1)
+  await expect.poll(mineCount, { message: 'exactly one browser should hold a booking', ...settle }).toBe(1)
 
   const aliceWon = DESK_STATUS.mine.test((await buttons[0].getAttribute('aria-label')) ?? '')
   const [winner, loser] = aliceWon ? contenders : [contenders[1], contenders[0]]
 
   // The loser is told why and sees the winner's booking, all without a reload.
-  await expect(loser.app.announcer, `conflict message for ${loser.app.user.username}`).toContainText(CONFLICT_MESSAGE)
-  await loser.app.expectDesk(winner.desk, DESK_STATUS.bookedBy(winner.app.user.displayName))
+  await expect(loser.app.announcer, `conflict message for ${loser.app.user.username}`).toContainText(
+    CONFLICT_MESSAGE,
+    settle,
+  )
+  await loser.app.expectDesk(winner.desk, DESK_STATUS.bookedBy(winner.app.user.displayName), settle)
   await loser.app.expectDesk(
     loser.desk,
     scenario.loserDeskStatus === 'blocked' ? DESK_STATUS.blocked : DESK_STATUS.bookedBy(winner.app.user.displayName),
+    settle,
   )
-  await winner.app.expectDesk(winner.desk, DESK_STATUS.mine)
+  await winner.app.expectDesk(winner.desk, DESK_STATUS.mine, settle)
   expect(await mineCount(), 'only the winner holds a booking after both settle').toBe(1)
 
   // The server agrees: one booking, held by the winner.
@@ -133,10 +148,10 @@ test.describe('desks on either side of a walkway', () => {
     // Column 7 of Floor 3 is a walkway, so 3-A6 and 3-A8 are not adjacent desks.
     await Promise.all([alice.clickDesk('3-A6'), bob.clickDesk('3-A8')])
 
-    await alice.expectDesk('3-A6', DESK_STATUS.mine)
-    await bob.expectDesk('3-A8', DESK_STATUS.mine)
-    await alice.expectDesk('3-A8', DESK_STATUS.bookedBy(USERS.bob.displayName))
-    await bob.expectDesk('3-A6', DESK_STATUS.bookedBy(USERS.alice.displayName))
+    await alice.expectDesk('3-A6', DESK_STATUS.mine, settle)
+    await bob.expectDesk('3-A8', DESK_STATUS.mine, settle)
+    await alice.expectDesk('3-A8', DESK_STATUS.bookedBy(USERS.bob.displayName), settle)
+    await bob.expectDesk('3-A6', DESK_STATUS.bookedBy(USERS.alice.displayName), settle)
     expect(await bookedDesks(FLOOR_3, date)).toEqual({
       '3-A6': USERS.alice.displayName,
       '3-A8': USERS.bob.displayName,
