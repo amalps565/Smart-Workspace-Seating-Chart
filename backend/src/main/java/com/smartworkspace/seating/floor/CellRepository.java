@@ -24,4 +24,11 @@ public interface CellRepository extends JpaRepository<Cell, Long> {
 			""")
 	List<SnapshotRow> findSnapshotRows(@Param("floorId") long floorId, @Param("date") LocalDate date);
 
+	/** The cells in a rectangle of a floor; used by the neighbour policy to read the cells around a desk. */
+	List<Cell> findByFloorIdAndRowBetweenAndColBetween(long floorId, int rowFrom, int rowTo, int colFrom, int colTo);
+
+	/** The next desk version from {@code desk_status_seq}. */
+	@Query(value = "select nextval('desk_status_seq')", nativeQuery = true)
+	long nextDeskSeq();
+
 }
