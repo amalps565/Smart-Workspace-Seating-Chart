@@ -44,3 +44,48 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+
+  e2e:
+    name: End-to-end
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            e2e/package-lock.json
+      - name: Start PostgreSQL
+        working-directory: .
+        run: docker compose up -d --wait
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      - name: Compile the backend
+        working-directory: backend
+        run: ./mvnw -B -DskipTests compile
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      # Playwright starts the backend (spring-boot:run) and the Vite dev server itself.
+      - run: npx playwright test
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            e2e/playwright-report/
+            e2e/test-results/
+          retention-days: 14

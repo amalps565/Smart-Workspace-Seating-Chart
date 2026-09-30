@@ -18,6 +18,11 @@ Every entry ends with its number: `(#<issue>)` for issue work, `(PR #<n>)` for a
 - `.gitattributes` for LF line endings, `docker-compose.yml` with PostgreSQL 17, and GitHub Actions CI running the backend and frontend checks on every PR and on pushes to `main`. (#1)
 - `pr-review` checks for a changelog entry and treats a missing one as blocking. (PR #10)
 - This repository changelog, and the rule that every changelog entry ends with its issue or PR number. (PR #15)
+- Playwright end-to-end tests in a top-level `e2e/` package (Chromium). They cover login and booking; the spacing rule in both neighbour modes; live updates between two browsers; cancelling from the map and from "My bookings"; and two users racing for neighbouring desks, diagonal desks, and the same desk. (#8)
+- `e2e` CI job that runs the end-to-end tests against the real backend, frontend, and PostgreSQL, and uploads the Playwright report on failure. (#8)
+- `README.md` sections for getting started, the repository structure, the three test suites, how each of the three problems was solved, and troubleshooting when port 5432 is taken. (#8)
+- `POSTGRES_PORT` setting in `docker-compose.yml`, so PostgreSQL can run on another host port when 5432 is taken. (#8)
 
 ### Changed
 - Backend stack moved from Spring Boot 3 to Spring Boot 4.1 in `README.md`, `CLAUDE.md`, and the Java agent, because Spring Initializr no longer offers 3.x. (#1)
+- `CLAUDE.md` lists the `e2e/` commands and the port 5432 workaround, and `frontend/CLAUDE.md` points to `e2e/` for end-to-end tests. (#8)

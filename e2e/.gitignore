@@ -1,0 +1,8 @@
+node_modules/
+# Browsers installed with PLAYWRIGHT_BROWSERS_PATH=./.playwright-browsers
+.playwright-browsers/
+.npm/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/

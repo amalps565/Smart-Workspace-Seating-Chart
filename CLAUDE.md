@@ -10,8 +10,9 @@ An interactive Office Hot-Desking Map: employees see a floor as a grid of desks 
 
 - `backend/`: Spring Boot app. Commands and conventions are in `backend/CLAUDE.md`.
 - `frontend/`: React + TypeScript app. Commands and conventions are in `frontend/CLAUDE.md`.
-- `docker-compose.yml`: PostgreSQL 17 for local development (`docker compose up -d`).
-- `.github/workflows/ci.yml`: CI that runs the backend and frontend checks on every PR and push to `main`.
+- `docker-compose.yml`: PostgreSQL 17 for local development (`docker compose up -d --wait`). If port 5432 is taken, for example by a local PostgreSQL service, set `POSTGRES_PORT=5433` and `DB_URL=jdbc:postgresql://localhost:5433/seating`, or run the backend with `./mvnw spring-boot:test-run`.
+- `e2e/`: Playwright end-to-end tests (Chromium). Run from `e2e/`: `npm install`, `npm run install:browsers`, then `npm test`. For one test: `npx playwright test -g "<name>"`. For one file: `npx playwright test tests/race.spec.ts`. The tests start the backend and frontend or reuse running ones, and every UI selector lives in `e2e/tests/support/app.ts`.
+- `.github/workflows/ci.yml`: CI that runs the backend, frontend, and end-to-end checks on every PR and push to `main`.
 - `.wiki/`: local clone of the GitHub wiki, for editing it (gitignored; see "Wiki" below).
 - `.claude/skills/`: workflow skills: `create-issue`, `triage-issue`, `start-issue`, `pr-review`, `merge-pr`.
 - `.claude/agents/`: `senior-java-engineer` (backend), `senior-frontend-engineer` (frontend), `senior-qa-engineer` (tests across both).
